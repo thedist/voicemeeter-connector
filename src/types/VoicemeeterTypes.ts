@@ -3,7 +3,7 @@ export type VoiceMeeterTypes = "voicemeeter" | "voicemeeterBanana" | "voicemeete
 export interface VMLibrary {
 	VBVMR_Login: any;
 	VBVMR_Logout: any;
-	VBVMR_RunVoicemeeter: (voicemeeterType: any) => number;
+	VBVMR_RunVoicemeeter: any
 	VBVMR_IsParametersDirty: any;
 	VBVMR_GetParameterFloat: any;
 	VBVMR_GetParameterStringA: any;
@@ -13,7 +13,7 @@ export interface VMLibrary {
 	VBVMR_Input_GetDeviceNumber: any;
 	VBVMR_Input_GetDeviceDescA: any;
 	VBVMR_GetVoicemeeterType: any;
-	VBVMR_GetVoicemeeterVersion: (versionPtr: any) => number;
+	VBVMR_GetVoicemeeterVersion: any
 }
 
 export interface Device {
