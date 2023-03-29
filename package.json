@@ -13,8 +13,7 @@
 		"dev": "microbundle watch",
 		"lint": "npx eslint src/**/*.{js,ts,tsx} --quiet --fix",
 		"format": "npx prettier --write \"src/**/*.{ts,tsx,js,jsx}\"",
-		"generate-docu": "typedoc --out ./docs src/index.ts",
-		"prepare": "microbundle"
+		"generate-docu": "typedoc --out ./docs src/index.ts"
 	},
 	"dependencies": {
 		"ffi-napi": "4.0.3",
