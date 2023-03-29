@@ -3,7 +3,7 @@ import ffi from "ffi-napi";
 import refArray from "ref-array-napi";
 import DLLHandler from "./DLLHandler";
 import { Device, VMLibrary, VoiceMeeterTypes } from "../types/VoicemeeterTypes";
-import { BusProperties, StripProperties } from "./VoicemeeterConsts";
+import { BusProperties, RecorderProperties, StripProperties } from "./VoicemeeterConsts";
 /**
  * @ignore
  */
@@ -192,6 +192,33 @@ export default class Voicemeeter {
 	};
 
 	/**
+	 * Sets a parameter of a bus.
+	 * @param  {number} index Bus number
+	 * @param  {StripProperties} property Propertyname which should be changed
+	 * @param  {any} value Property value
+	 */
+	public setBusParameter = (index: number, property: BusProperties, value: any) => {
+		return this.setParameter("Bus", index, property, value);
+	};
+
+	/**
+	 * Get a recorder parameter.
+	 * @param {RecorderProperties} property Property which should be get
+	 */
+	public getRecorderParameter = (property: RecorderProperties) => {
+		return this.getParameter("Recorder", 0, property);
+	}
+
+	/**
+	 * Set a recorder parameter.
+	 * @param {RecorderProperties} property PropertyName which should be changed
+	 * @param {any} value Property value
+	 */
+	public setRecorderParameter = (property: RecorderProperties, value: any) => {
+		return this.setParameter("Recorder", 0, property, value);
+	}
+
+	/**
 	 * Gets a strip parameter
 	 * @param  {number} index Index of the strip
 	 * @param  {StripProperties} property Property which should be get
@@ -208,16 +235,6 @@ export default class Voicemeeter {
 	 */
 	public setStripParameter = (index: number, property: StripProperties, value: any) => {
 		return this.setParameter("Strip", index, property, value);
-	};
-
-	/**
-	 * Sets a parameter of a bus.
-	 * @param  {number} index Bus number
-	 * @param  {StripProperties} property Propertyname which should be changed
-	 * @param  {any} value Property value
-	 */
-	public setBusParameter = (index: number, property: BusProperties, value: any) => {
-		return this.setParameter("Bus", index, property, value);
 	};
 
 	/**
@@ -287,8 +304,8 @@ export default class Voicemeeter {
 	 * @param  {number} index Number of strip or bus
 	 * @param  {StripProperties|BusProperties} property Property which should be read
 	 */
-	private getParameter = (selector: "Strip" | "Bus", index: number, property: StripProperties | BusProperties) => {
-		const parameterName = `${selector}[${index}].${property}`;
+	private getParameter = (selector: "Strip" | "Bus" | "Recorder", index: number, property: StripProperties | BusProperties | RecorderProperties) => {
+		const parameterName = selector !== 'Recorder' ? `${selector}[${index}].${property}` : `Recorder.${property}`;
 		if (!this.isConnected) {
 			throw new Error("Not correct connected ");
 		}
@@ -319,15 +336,15 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	private setParameter = (
-		selector: "Strip" | "Bus",
+		selector: "Strip" | "Bus" | "Recorder",
 		index: number,
-		property: StripProperties | BusProperties,
+		property: StripProperties | BusProperties | RecorderProperties,
 		value: any
 	): Promise<any> => {
 		if (!this.isConnected) {
 			throw new Error("Not connected ");
 		}
-		const scriptString = `${selector}[${index}].${property}=${value};`;
+		const scriptString = selector !== 'Recorder' ? `${selector}[${index}].${property}=${value};` : `Recorder.${property}=${value};`;
 		return this.setOption(scriptString);
 	};
 }

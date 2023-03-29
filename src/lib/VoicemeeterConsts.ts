@@ -120,7 +120,7 @@ export enum FXSettings {
 	DelayAB = "Delay.AB",
 }
 
-export enum Recorder {
+export enum RecorderProperties {
 	Stop = "stop",
 	Play = "play",
 	Replay = "replay",
