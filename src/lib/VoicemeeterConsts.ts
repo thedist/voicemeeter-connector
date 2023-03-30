@@ -60,7 +60,7 @@ export enum StripProperties {
 	Reverb = "Reverb",
 	Delay = "Delay",
 	Fx1 = "Fx1",
-	FX2 = "Fx2",
+	Fx2 = "Fx2",
 	PostReverb = "PostReverb",
 	PostDelay = "PostDelay",
 	PostFx1 = "PostFx1",
