@@ -4,5 +4,5 @@ import * as types from "./types/VoicemeeterTypes";
 declare const BusProperties: typeof constants.BusProperties, InterfaceTypes: {
     strip: number;
     bus: number;
-}, StripProperties: typeof constants.StripProperties;
-export { Voicemeeter, BusProperties, InterfaceTypes, StripProperties, types };
+}, StripProperties: typeof constants.StripProperties, FXSettings: typeof constants.FXSettings, RecorderProperties: typeof constants.RecorderProperties;
+export { Voicemeeter, BusProperties, InterfaceTypes, StripProperties, FXSettings, RecorderProperties, types };

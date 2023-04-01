@@ -26,14 +26,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.types = exports.StripProperties = exports.InterfaceTypes = exports.BusProperties = exports.Voicemeeter = void 0;
+exports.types = exports.RecorderProperties = exports.FXSettings = exports.StripProperties = exports.InterfaceTypes = exports.BusProperties = exports.Voicemeeter = void 0;
 const VoicemeeterConnector_1 = __importDefault(require("./lib/VoicemeeterConnector"));
 exports.Voicemeeter = VoicemeeterConnector_1.default;
 const constants = __importStar(require("./lib/VoicemeeterConsts"));
 const types = __importStar(require("./types/VoicemeeterTypes"));
 exports.types = types;
-const { BusProperties, InterfaceTypes, StripProperties } = constants;
+const { BusProperties, InterfaceTypes, StripProperties, FXSettings, RecorderProperties } = constants;
 exports.BusProperties = BusProperties;
 exports.InterfaceTypes = InterfaceTypes;
 exports.StripProperties = StripProperties;
+exports.FXSettings = FXSettings;
+exports.RecorderProperties = RecorderProperties;
 //# sourceMappingURL=index.js.map
