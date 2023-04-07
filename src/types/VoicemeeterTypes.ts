@@ -5,6 +5,7 @@ export interface VMLibrary {
 	VBVMR_Logout: any;
 	VBVMR_RunVoicemeeter: any
 	VBVMR_IsParametersDirty: any;
+	VBVMR_GetLevel: any;
 	VBVMR_GetParameterFloat: any;
 	VBVMR_GetParameterStringA: any;
 	VBVMR_SetParameters: any;

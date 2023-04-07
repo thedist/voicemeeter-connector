@@ -63,6 +63,12 @@ export default class Voicemeeter {
      */
     setBusParameter: (index: number, property: BusProperties, value: any) => Promise<any>;
     /**
+     * Gets input or output levels
+     * @param {0 | 1 | 2 | 3} type 0 = pre fader input | 1 = post fader input | 2 = post Mute input | 3 = Output
+     * @param {number} id 0 indexed level ID, Physical inputs have 2 levels, virutal inputs and all outputs have 8 levels
+     */
+    getLevel: (type: 0 | 1 | 2 | 3, id: number) => unknown;
+    /**
      * Get a recorder parameter.
      * @param {RecorderProperties} property Property which should be get
      */

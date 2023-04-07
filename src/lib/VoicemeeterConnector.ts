@@ -42,6 +42,7 @@ export default class Voicemeeter {
 				VBVMR_Logout: ["long", []],
 				VBVMR_RunVoicemeeter: ["long", ["long"]],
 				VBVMR_IsParametersDirty: ["long", []],
+				VBVMR_GetLevel: ["long", ["long", "long", FloatArray]],
 				VBVMR_GetParameterFloat: ["long", [CharArray, FloatArray]],
 				VBVMR_GetParameterStringA: ["long", [CharArray, CharArray]],
 				VBVMR_SetParameters: ["long", [CharArray]],
@@ -200,6 +201,21 @@ export default class Voicemeeter {
 	public setBusParameter = (index: number, property: BusProperties, value: any) => {
 		return this.setParameter("Bus", index, property, value);
 	};
+
+	/**
+	 * Gets input or output levels
+	 * @param {0 | 1 | 2 | 3} type 0 = pre fader input | 1 = post fader input | 2 = post Mute input | 3 = Output
+	 * @param {number} id 0 indexed level ID, Physical inputs have 2 levels, virutal inputs and all outputs have 8 levels
+	 */
+	public getLevel = (type: 0 | 1 | 2 | 3, id: number) => {
+		if (!this.isConnected) {
+			throw new Error("Not correct connected ");
+		}
+
+		let namePtr = new FloatArray(1);
+		libVM.VBVMR_GetLevel(type, id, namePtr);
+		return namePtr[0];
+	}
 
 	/**
 	 * Get a recorder parameter.
