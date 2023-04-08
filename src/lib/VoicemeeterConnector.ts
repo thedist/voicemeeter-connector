@@ -195,7 +195,7 @@ export default class Voicemeeter {
 	/**
 	 * Sets a parameter of a bus.
 	 * @param  {number} index Bus number
-	 * @param  {StripProperties} property Propertyname which should be changed
+	 * @param  {BusProperties} property Propertyname which should be changed
 	 * @param  {any} value Property value
 	 */
 	public setBusParameter = (index: number, property: BusProperties, value: any) => {
