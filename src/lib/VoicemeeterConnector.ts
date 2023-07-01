@@ -3,7 +3,7 @@ import ffi from "ffi-napi";
 import refArray from "ref-array-napi";
 import DLLHandler from "./DLLHandler";
 import { Device, VMLibrary, VoiceMeeterTypes } from "../types/VoicemeeterTypes";
-import { BusProperties, RecorderProperties, StripProperties } from "./VoicemeeterConsts";
+import { BusProperties, RecorderProperties, StripProperties, CommandActions, CommandButtons, CommandEqs } from "./VoicemeeterConsts";
 /**
  * @ignore
  */
@@ -254,6 +254,50 @@ export default class Voicemeeter {
 	};
 
 	/**
+	 * Execute a global action
+	 * @param  {CommandActions} property Action which should be called
+	 * @param  {any} value Property value
+	 */
+	public executeGlobalAction = (property: CommandActions, value: any) => {
+		return this.setParameter("Command", 0, property, value);
+	};
+
+	/**
+	 * Execute button action
+	 * @param  {CommandButtons} property Action which should be called
+	 * @param  {any} value Property value
+	 */
+	public executeButtonAction = (index: number, property: CommandButtons, value: any) => {
+		return this.setParameter("Command", index, property, value);
+	};
+
+	/**
+	 * Execute EQ action
+	 * @param  {CommandEqs} property Action which should be called
+	 * @param  {any} value Property value
+	 */
+	public executeEqAction = (index: number, property: CommandEqs, value: any) => {
+		return this.setParameter("Command", index, property, value);
+	};
+
+	/**
+	 * Gets global state
+	 * @param  {CommandActions.Lock} property Property which should be get
+	 */
+	public getGlobalState = (property: CommandActions.Lock) => {
+		return this.getParameter("Command", 0, property);
+	};
+
+	/**
+	 * Gets a button parameter
+	 * @param  {number} index Index of the strip
+	 * @param  {CommandButtons} property Property which should be get
+	 */
+	public getButtonParameter = (index: number, property: CommandButtons) => {
+		return this.getParameter("Command", index, property);
+	};
+
+	/**
 	 * @param  {()=>any} fn Function which should be called if something changes
 	 */
 	public attachChangeEvent = (fn: () => any) => {
@@ -316,12 +360,36 @@ export default class Voicemeeter {
 
 	/**
 	 * Gets a parameter of voicemeeter
-	 * @param  {'Strip'|'Bus'} selector Strip or Bus
+	 * @param  {'Strip'|'Bus'|'Recorder'|'Command'} selector Strip, Bus, Recorder or
 	 * @param  {number} index Number of strip or bus
-	 * @param  {StripProperties|BusProperties} property Property which should be read
+	 * @param  {StripProperties|BusProperties|RecorderProperties|CommandActions.Lock|CommandButtons} property Property which should be read
 	 */
-	private getParameter = (selector: "Strip" | "Bus" | "Recorder", index: number, property: StripProperties | BusProperties | RecorderProperties) => {
-		const parameterName = selector !== 'Recorder' ? `${selector}[${index}].${property}` : `Recorder.${property}`;
+	private getParameter = (selector: "Strip" | "Bus" | "Recorder" | "Command", index: number, property: StripProperties | BusProperties | RecorderProperties | CommandActions.Lock | CommandButtons) => {
+		let parameterName = '';
+		switch (selector) {
+			case "Strip":
+			case "Bus":
+				parameterName = `${selector}[${index}].${property}`;
+				break;
+			case "Command":
+				switch (property) {
+					case CommandButtons.State:
+						parameterName = `Command.Button[${index}].State`;
+					case CommandButtons.StateOnly:
+						parameterName = `Command.Button[${index}].StateOnly`;
+					case CommandButtons.Trigger:
+						parameterName = `Command.Button[${index}].Trigger`;
+					case CommandButtons.Color:
+						parameterName = `Command.Button[${index}].Color`;
+					default:
+						parameterName = `Command.${property}`;
+				}
+				break;
+			default:
+				parameterName = `${selector}.${property}`;
+		}
+
+
 		if (!this.isConnected) {
 			throw new Error("Not correct connected ");
 		}
@@ -345,22 +413,52 @@ export default class Voicemeeter {
 	};
 
 	/**
-	 * Sets a parameter of a bus or Strip
-	 * @param  {'Strip'|'Bus'} selector
+	 * Sets a parameter of a Bus, Strip, Recorder or Command
+	 * @param  {'Strip'|'Bus'|'Recorder'|'Command'} selector
 	 * @param  {number} index Number of strip or bus
-	 * @param  {StripProperties|BusProperties} property Propertyname which should be changed
+	 * @param  {StripProperties|BusProperties|RecorderProperties|CommandActions|CommandButtons|CommandEqs} property Propertyname which should be changed
 	 * @param  {any} value Property value
 	 */
 	private setParameter = (
-		selector: "Strip" | "Bus" | "Recorder",
+		selector: "Strip" | "Bus" | "Recorder" | "Command",
 		index: number,
-		property: StripProperties | BusProperties | RecorderProperties,
+		property: StripProperties | BusProperties | RecorderProperties | CommandActions | CommandButtons | CommandEqs,
 		value: any
 	): Promise<any> => {
 		if (!this.isConnected) {
 			throw new Error("Not connected ");
 		}
-		const scriptString = selector !== 'Recorder' ? `${selector}[${index}].${property}=${value};` : `Recorder.${property}=${value};`;
+		let scriptString = '';
+		switch (selector) {
+			case "Strip":
+			case "Bus":
+				scriptString = `${selector}[${index}].${property}=${value};`;
+				break;
+			case "Command":
+				switch (property) {
+					case CommandButtons.State:
+						scriptString = `Command.Button[${index}].State=${value};`;
+					case CommandButtons.StateOnly:
+						scriptString = `Command.Button[${index}].StateOnly=${value};`;
+					case CommandButtons.Trigger:
+						scriptString = `Command.Button[${index}].Trigger=${value};`;
+					case CommandButtons.Color:
+						scriptString = `Command.Button[${index}].Color=${value};`;
+					case CommandEqs.SaveBus:
+						scriptString = `Command.SaveBUSEQ[${index}]=${value};`;
+					case CommandEqs.LoadBus:
+						scriptString = `Command.LoadBUSEQ[${index}]=${value};`;
+					case CommandEqs.SaveStrip:
+						scriptString = `Command.SaveStripEQ[${index}]=${value};`;
+					case CommandEqs.LoadStrip:
+						scriptString = `Command.LoadStripEQ[${index}]=${value};`;
+					default:
+						scriptString = `Command.${property}=${value};`;
+				}
+				break;
+			default:
+				scriptString = `${selector}.${property}=${value};`;
+		}
 		return this.setOption(scriptString);
 	};
 }
