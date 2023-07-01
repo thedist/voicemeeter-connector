@@ -1,5 +1,5 @@
 import { Device, VoiceMeeterTypes } from "../types/VoicemeeterTypes";
-import { BusProperties, RecorderProperties, StripProperties } from "./VoicemeeterConsts";
+import { BusProperties, RecorderProperties, StripProperties, CommandActions, CommandButtons, CommandEqs } from "./VoicemeeterConsts";
 export default class Voicemeeter {
     /**
      * Initializes the voice meeter dll connection.
@@ -58,7 +58,7 @@ export default class Voicemeeter {
     /**
      * Sets a parameter of a bus.
      * @param  {number} index Bus number
-     * @param  {StripProperties} property Propertyname which should be changed
+     * @param  {BusProperties} property Propertyname which should be changed
      * @param  {any} value Property value
      */
     setBusParameter: (index: number, property: BusProperties, value: any) => Promise<any>;
@@ -93,6 +93,35 @@ export default class Voicemeeter {
      */
     setStripParameter: (index: number, property: StripProperties, value: any) => Promise<any>;
     /**
+     * Execute a global action
+     * @param  {CommandActions} property Action which should be called
+     * @param  {any} value Property value
+     */
+    executeGlobalAction: (property: CommandActions, value: any) => Promise<any>;
+    /**
+     * Execute button action
+     * @param  {CommandButtons} property Action which should be called
+     * @param  {any} value Property value
+     */
+    executeButtonAction: (index: number, property: CommandButtons, value: any) => Promise<any>;
+    /**
+     * Execute EQ action
+     * @param  {CommandEqs} property Action which should be called
+     * @param  {any} value Property value
+     */
+    executeEqAction: (index: number, property: CommandEqs, value: any) => Promise<any>;
+    /**
+     * Gets global state
+     * @param  {CommandActions.Lock} property Property which should be get
+     */
+    getGlobalState: (property: CommandActions.Lock) => any;
+    /**
+     * Gets a button parameter
+     * @param  {number} index Index of the strip
+     * @param  {CommandButtons} property Property which should be get
+     */
+    getButtonParameter: (index: number, property: CommandButtons) => any;
+    /**
      * @param  {()=>any} fn Function which should be called if something changes
      */
     attachChangeEvent: (fn: () => any) => void;
@@ -116,16 +145,16 @@ export default class Voicemeeter {
     private getVoicemeeterVersion;
     /**
      * Gets a parameter of voicemeeter
-     * @param  {'Strip'|'Bus'} selector Strip or Bus
+     * @param  {'Strip'|'Bus'|'Recorder'|'Command'} selector Strip, Bus, Recorder or
      * @param  {number} index Number of strip or bus
-     * @param  {StripProperties|BusProperties} property Property which should be read
+     * @param  {StripProperties|BusProperties|RecorderProperties|CommandActions.Lock|CommandButtons} property Property which should be read
      */
     private getParameter;
     /**
-     * Sets a parameter of a bus or Strip
-     * @param  {'Strip'|'Bus'} selector
+     * Sets a parameter of a Bus, Strip, Recorder or Command
+     * @param  {'Strip'|'Bus'|'Recorder'|'Command'} selector
      * @param  {number} index Number of strip or bus
-     * @param  {StripProperties|BusProperties} property Propertyname which should be changed
+     * @param  {StripProperties|BusProperties|RecorderProperties|CommandActions|CommandButtons|CommandEqs} property Propertyname which should be changed
      * @param  {any} value Property value
      */
     private setParameter;

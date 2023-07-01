@@ -163,3 +163,26 @@ export declare enum RecorderProperties {
     FileType = "FileType",
     Gain = "Gain"
 }
+export declare enum CommandActions {
+    Shutdown = "Shutdown",
+    Show = "Show",
+    Restart = "Restart",
+    Eject = "Eject",
+    Reset = "Reset",
+    Save = "Save",
+    Load = "Load",
+    Lock = "Lock",
+    DialogShowVBANChat = "DialogShow.VBANCHAT"
+}
+export declare enum CommandButtons {
+    State = "ButtonState",
+    StateOnly = "ButtonStateOnly",
+    Trigger = "ButtonTrigger",
+    Color = "ButtonColor"
+}
+export declare enum CommandEqs {
+    SaveBus = "EqSaveBus",
+    LoadBus = "EqLoadBus",
+    SaveStrip = "EqSaveStrip",
+    LoadStrip = "EqLoadStrip"
+}
