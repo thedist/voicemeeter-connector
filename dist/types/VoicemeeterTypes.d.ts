@@ -1,4 +1,4 @@
-export type VoiceMeeterTypes = "voicemeeter" | "voicemeeterBanana" | "voicemeeterPotato" | undefined;
+export declare type VoiceMeeterTypes = "voicemeeter" | "voicemeeterBanana" | "voicemeeterPotato" | undefined;
 export interface VMLibrary {
     VBVMR_Login: any;
     VBVMR_Logout: any;
