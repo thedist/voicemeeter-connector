@@ -1,22 +1,32 @@
 /* eslint-disable no-control-regex */
-import ffi from "ffi-napi";
-import refArray from "ref-array-napi";
-import DLLHandler from "./DLLHandler";
-import { Device, VMLibrary, VoiceMeeterTypes } from "../types/VoicemeeterTypes";
-import { BusProperties, RecorderProperties, StripProperties, CommandActions, CommandButtons, CommandEqs } from "./VoicemeeterConsts";
+import ffi from 'ffi-napi';
+import refArray from 'ref-array-napi';
+import DLLHandler from './DLLHandler';
+import { Device, VMLibrary, VoiceMeeterTypes } from '../types/VoicemeeterTypes';
+import {
+	BusProperties,
+	RecorderProperties,
+	StripProperties,
+	CommandActions,
+	CommandButtons,
+	CommandEqs,
+	VBAN,
+	VBANInstream,
+	VBANOutstream
+} from './VoicemeeterConsts';
 
 /**
  * @ignore
  */
-const CharArray = refArray("char");
+const CharArray = refArray('char');
 /**
  * @ignore
  */
-const LongArray = refArray("long");
+const LongArray = refArray('long');
 /**
  * @ignore
  */
-const FloatArray = refArray("float");
+const FloatArray = refArray('float');
 /**
  * @ignore
  */
@@ -39,20 +49,20 @@ export default class Voicemeeter {
 				instance = new Voicemeeter();
 			}
 			libVM = ffi.Library(`${dllPath}/VoicemeeterRemote64.dll`, {
-				VBVMR_Login: ["long", []],
-				VBVMR_Logout: ["long", []],
-				VBVMR_RunVoicemeeter: ["long", ["long"]],
-				VBVMR_IsParametersDirty: ["long", []],
-				VBVMR_GetLevel: ["long", ["long", "long", FloatArray]],
-				VBVMR_GetParameterFloat: ["long", [CharArray, FloatArray]],
-				VBVMR_GetParameterStringA: ["long", [CharArray, CharArray]],
-				VBVMR_SetParameters: ["long", [CharArray]],
-				VBVMR_Output_GetDeviceNumber: ["long", []],
-				VBVMR_Output_GetDeviceDescA: ["long", ["long", LongArray, CharArray, CharArray]],
-				VBVMR_Input_GetDeviceNumber: ["long", []],
-				VBVMR_Input_GetDeviceDescA: ["long", ["long", LongArray, CharArray, CharArray]],
-				VBVMR_GetVoicemeeterType: ["long", [LongArray]],
-				VBVMR_GetVoicemeeterVersion: ["long", [LongArray]],
+				VBVMR_Login: ['long', []],
+				VBVMR_Logout: ['long', []],
+				VBVMR_RunVoicemeeter: ['long', ['long']],
+				VBVMR_IsParametersDirty: ['long', []],
+				VBVMR_GetLevel: ['long', ['long', 'long', FloatArray]],
+				VBVMR_GetParameterFloat: ['long', [CharArray, FloatArray]],
+				VBVMR_GetParameterStringA: ['long', [CharArray, CharArray]],
+				VBVMR_SetParameters: ['long', [CharArray]],
+				VBVMR_Output_GetDeviceNumber: ['long', []],
+				VBVMR_Output_GetDeviceDescA: ['long', ['long', LongArray, CharArray, CharArray]],
+				VBVMR_Input_GetDeviceNumber: ['long', []],
+				VBVMR_Input_GetDeviceDescA: ['long', ['long', LongArray, CharArray, CharArray]],
+				VBVMR_GetVoicemeeterType: ['long', [LongArray]],
+				VBVMR_GetVoicemeeterVersion: ['long', [LongArray]],
 			});
 			instance.isInitialised = true;
 			resolve(instance);
@@ -63,7 +73,7 @@ export default class Voicemeeter {
 	private isConnected = false;
 	private outputDevices: Device[] = [];
 	private inputDevices: Device[] = [];
-	private version = "";
+	private version = '';
 	private type: VoiceMeeterTypes;
 	private eventPool = [] as Array<() => void>;
 
@@ -72,7 +82,7 @@ export default class Voicemeeter {
 	 */
 	public connect = () => {
 		if (!this.isInitialised) {
-			throw new Error("Await the initialisation before connect");
+			throw new Error('Await the initialisation before connect');
 		}
 		if (this.isConnected) {
 			return;
@@ -85,7 +95,7 @@ export default class Voicemeeter {
 			return;
 		}
 		this.isConnected = false;
-		throw new Error("Connection failed");
+		throw new Error('Connection failed');
 	};
 
 	/**
@@ -125,16 +135,16 @@ export default class Voicemeeter {
 	 */
 	public disconnect = () => {
 		if (!this.isConnected) {
-			throw new Error("Not connected ");
+			throw new Error('Not connected');
 		}
 		try {
 			if (libVM.VBVMR_Logout() === 0) {
 				this.isConnected = false;
 				return;
 			}
-			throw new Error("Disconnect failed");
+			throw new Error('Disconnect failed');
 		} catch {
-			throw new Error("Disconnect failed");
+			throw new Error('Disconnect failed');
 		}
 	};
 
@@ -143,7 +153,7 @@ export default class Voicemeeter {
 	 */
 	public updateDeviceList = () => {
 		if (!this.isConnected) {
-			throw new Error("Not connected ");
+			throw new Error('Not connected');
 		}
 		this.outputDevices = [];
 		this.inputDevices = [];
@@ -155,8 +165,8 @@ export default class Voicemeeter {
 
 			libVM.VBVMR_Output_GetDeviceDescA(i, typePtr, namePtr, hardwareIdPtr);
 			this.outputDevices.push({
-				name: String.fromCharCode(...namePtr.toArray()).replace(/\u0000+$/g, ""),
-				hardwareId: String.fromCharCode(...hardwareIdPtr.toArray()).replace(/\u0000+$/g, ""),
+				name: String.fromCharCode(...namePtr.toArray()).replace(/\u0000+$/g, ''),
+				hardwareId: String.fromCharCode(...hardwareIdPtr.toArray()).replace(/\u0000+$/g, ''),
 				type: typePtr[0],
 			});
 		}
@@ -169,8 +179,8 @@ export default class Voicemeeter {
 
 			libVM.VBVMR_Input_GetDeviceDescA(i, typePtr, namePtr, hardwareIdPtr);
 			this.inputDevices.push({
-				name: String.fromCharCode(...namePtr.toArray()).replace(/\u0000+$/g, ""),
-				hardwareId: String.fromCharCode(...hardwareIdPtr.toArray()).replace(/\u0000+$/g, ""),
+				name: String.fromCharCode(...namePtr.toArray()).replace(/\u0000+$/g, ''),
+				hardwareId: String.fromCharCode(...hardwareIdPtr.toArray()).replace(/\u0000+$/g, ''),
 				type: typePtr[0],
 			});
 		}
@@ -190,7 +200,7 @@ export default class Voicemeeter {
 	 */
 
 	public getBusParameter = (index: number, property: BusProperties) => {
-		return this.getParameter("Bus", index, property);
+		return this.getParameter('Bus', index, property);
 	};
 
 	/**
@@ -200,7 +210,7 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	public setBusParameter = (index: number, property: BusProperties, value: any) => {
-		return this.setParameter("Bus", index, property, value);
+		return this.setParameter('Bus', index, property, value);
 	};
 
 	/**
@@ -210,7 +220,7 @@ export default class Voicemeeter {
 	 */
 	public getLevel = (type: 0 | 1 | 2 | 3, id: number) => {
 		if (!this.isConnected) {
-			throw new Error("Not correct connected ");
+			throw new Error('Not correct connected');
 		}
 
 		let namePtr = new FloatArray(1);
@@ -223,7 +233,7 @@ export default class Voicemeeter {
 	 * @param {RecorderProperties} property Property which should be get
 	 */
 	public getRecorderParameter = (property: RecorderProperties) => {
-		return this.getParameter("Recorder", 0, property);
+		return this.getParameter('Recorder', 0, property);
 	}
 
 	/**
@@ -232,7 +242,7 @@ export default class Voicemeeter {
 	 * @param {any} value Property value
 	 */
 	public setRecorderParameter = (property: RecorderProperties, value: any) => {
-		return this.setParameter("Recorder", 0, property, value);
+		return this.setParameter('Recorder', 0, property, value);
 	}
 
 	/**
@@ -241,7 +251,7 @@ export default class Voicemeeter {
 	 * @param  {StripProperties} property Property which should be get
 	 */
 	public getStripParameter = (index: number, property: StripProperties) => {
-		return this.getParameter("Strip", index, property);
+		return this.getParameter('Strip', index, property);
 	};
 
 	/**
@@ -251,7 +261,60 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	public setStripParameter = (index: number, property: StripProperties, value: any) => {
-		return this.setParameter("Strip", index, property, value);
+		return this.setParameter('Strip', index, property, value);
+	};
+
+	/**
+	 * Gets VBAN On/Off parameter
+	 */
+	public getVBANParameter = () => {
+		return this.getParameter('VBAN', 0, VBAN.Enable)
+	};
+
+	/**
+	 * Set  VBAN On/Off parameter
+	 * @param {any} value Property value
+	 */
+	public setVBANParameter = (value: any) => {
+		return this.setParameter('VBAN', 0, VBAN.Enable, value)
+	};
+		
+	/**
+	 * get VBAN Incoming Stream parameter
+	 * @param  {nmber} index VBAN Stream incoming stream index
+	 * @param  {VBANInstream} property Propertyname which should be changed
+	 */
+	public getVBANInstreamParameter = (index: number, property: VBANInstream) => {
+		return this.getParameter('VBANInstream', index, property)
+	};
+
+	/**
+	 * Set VBAN Incoming Stream parameter
+	 * @param  {nmber} index VBAN Stream incoming stream index
+	 * @param  {VBANInstream} property Propertyname which should be changed
+	 * @param	 {any} value Property value
+	 */
+	public setVBANInstreamParameter = (index: number, property: VBANInstream, value: any) => {
+		return this.setParameter('VBANInstream', index, property, value)
+	};
+
+	/**
+	 * get VBAN Outgoing Stream parameter
+	 * @param  {nmber} index VBAN Stream incoming stream index
+	 * @param  {VBANInstream} property Propertyname which should be changed
+	 */
+	public getVBANOutstreamParameter = (index: number, property: VBANOutstream) => {
+		return this.getParameter('VBANOutstream', index, property)
+	};
+
+	/**
+	 * Set VBAN Outgoing Stream parameter
+	 * @param  {nmber} index VBAN Stream incoming stream index
+	 * @param  {VBANInstream} property Propertyname which should be changed
+	 * @param	 {any} value Property value
+	 */
+	public setVBANOutstreamParameter = (index: number, property: VBANOutstream, value: any) => {
+		return this.setParameter('VBANOutstream', index, property, value)
 	};
 
 	/**
@@ -260,7 +323,7 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	public executeCommandAction = (property: CommandActions, value: any) => {
-		return this.setParameter("Command", 0, property, value);
+		return this.setParameter('Command', 0, property, value);
 	};
 
 	/**
@@ -269,7 +332,7 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	public executeButtonAction = (index: number, property: CommandButtons, value: any) => {
-		return this.setParameter("Command", index, property, value);
+		return this.setParameter('Command', index, property, value);
 	};
 
 	/**
@@ -278,7 +341,7 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	public executeEqAction = (index: number, property: CommandEqs, value: any) => {
-		return this.setParameter("Command", index, property, value);
+		return this.setParameter('Command', index, property, value);
 	};
 
 	/**
@@ -286,7 +349,7 @@ export default class Voicemeeter {
 	 * @param  {CommandActions.Lock} property Property which should be get
 	 */
 	public getVMState = (property: CommandActions.Lock | CommandActions.Show) => {
-		return this.getParameter("Command", 0, property);
+		return this.getParameter('Command', 0, property);
 	};
 
 	/**
@@ -295,7 +358,7 @@ export default class Voicemeeter {
 	 * @param  {CommandButtons} property Property which should be get
 	 */
 	public getButtonParameter = (index: number, property: CommandButtons) => {
-		return this.getParameter("Command", index, property);
+		return this.getParameter('Command', index, property);
 	};
 
 	/**
@@ -334,17 +397,17 @@ export default class Voicemeeter {
 	private getVoicemeeterType = (): VoiceMeeterTypes => {
 		const typePtr = new LongArray(1);
 		if (libVM.VBVMR_GetVoicemeeterType(typePtr) !== 0) {
-			throw new Error("running failed");
+			throw new Error('running failed');
 		}
 		switch (typePtr[0]) {
 			case 1: // Voicemeeter
-				return "voicemeeter";
+				return 'voicemeeter';
 			case 2: // Voicemeeter Banana
-				return "voicemeeterBanana";
+				return 'voicemeeterBanana';
 			case 3: // Voicemeeter Potato
-				return "voicemeeterPotato";
+				return 'voicemeeterPotato';
 			default:
-				throw new Error("Voicemeeter seems not to be installed");
+				throw new Error('Voicemeeter seems not to be installed');
 		}
 	};
 
@@ -354,7 +417,7 @@ export default class Voicemeeter {
 	private getVoicemeeterVersion = () => {
 		const versionPtr = new LongArray(1) as any;
 		if (libVM.VBVMR_GetVoicemeeterVersion(versionPtr) !== 0) {
-			throw new Error("running failed");
+			throw new Error('running failed');
 		}
 		return versionPtr;
 	};
@@ -365,49 +428,48 @@ export default class Voicemeeter {
 	 * @param  {number} index Number of strip or bus
 	 * @param  {StripProperties|BusProperties|RecorderProperties|CommandActions.Lock|CommandActions.Show|CommandButtons} property Property which should be read
 	 */
-	private getParameter = (selector: "Strip" | "Bus" | "Recorder" | "Command", index: number, property: StripProperties | BusProperties | RecorderProperties | CommandActions.Lock | CommandActions.Show | CommandButtons) => {
-		let parameterName = '';
-		switch (selector) {
-			case "Strip":
-			case "Bus":
-				parameterName = `${selector}[${index}].${property}`;
-				break;
-			case "Command":
-				switch (property) {
-					case CommandButtons.State:
-						parameterName = `Command.Button[${index}].State`;
-					case CommandButtons.StateOnly:
-						parameterName = `Command.Button[${index}].StateOnly`;
-					case CommandButtons.Trigger:
-						parameterName = `Command.Button[${index}].Trigger`;
-					case CommandButtons.Color:
-						parameterName = `Command.Button[${index}].Color`;
-					default:
-						parameterName = `Command.${property}`;
-				}
-				break;
-			default:
-				parameterName = `${selector}.${property}`;
+	private getParameter = (
+		selector: 'Strip' | 'Bus' | 'Recorder' | 'Command' | 'VBAN' | 'VBANInstream' | 'VBANOutstream',
+		index: number,
+		property: StripProperties | BusProperties | RecorderProperties | CommandActions.Lock | CommandActions.Show | CommandButtons | VBAN | VBANInstream | VBANOutstream,
+	) => {
+		let parameterName = `${selector}.${property}`
+
+		if (selector === 'Strip') {
+			parameterName = `${selector}[${index}].${property}`
+		} else if (selector === 'Bus') {
+			parameterName = `${selector}[${index}].${property}`
+		} else if (selector === 'Command') {
+			parameterName = `Command.${property}`
+			if (property === CommandButtons.State) parameterName = `Command.Button[${index}].State`
+			if (property === CommandButtons.State) parameterName = `Command.Button[${index}].StateOnly`
+			if (property === CommandButtons.State) parameterName = `Command.Button[${index}].Trigger`
+			if (property === CommandButtons.State) parameterName = `Command.Button[${index}].Color`
+		} else if (selector === 'VBAN') {
+			parameterName = `vban.Enable`
+		} else if (selector === 'VBANInstream') {
+			parameterName = `vban.instream[${index}].${property}`
+		} else if (selector === 'VBANOutstream') {
+			parameterName = `vban.outstream[${index}].${property}`
 		}
 
 		if (!this.isConnected) {
-			throw new Error("Not correct connected ");
+			throw new Error('Not correct connected');
 		}
-
 		const hardwareIdPtr = Buffer.alloc(parameterName.length + 1);
 		hardwareIdPtr.write(parameterName);
 		let namePtr = null;
 
-		if (["Label", "FadeTo", "FadeBy", "AppGain", "AppMute", "device.name"].indexOf(property) > -1) {
+		if (['Label', 'FadeTo', 'FadeBy', 'AppGain', 'AppMute', 'device.name'].indexOf(property) > -1) {
 			namePtr = new CharArray(512);
 			libVM.VBVMR_GetParameterStringA(hardwareIdPtr, namePtr);
 			return String.fromCharCode
 				.apply(null, namePtr)
-				.split("")
+				.split('')
 				.filter((e: string) => {
-					return e !== "\0";
+					return e !== '\0';
 				})
-				.join("");
+				.join('');
 		}
 
 		namePtr = new FloatArray(1);
@@ -423,48 +485,49 @@ export default class Voicemeeter {
 	 * @param  {any} value Property value
 	 */
 	private setParameter = (
-		selector: "Strip" | "Bus" | "Recorder" | "Command",
+		selector: 'Strip' | 'Bus' | 'Recorder' | 'Command' | 'VBAN' | 'VBANInstream' | 'VBANOutstream',
 		index: number,
-		property: StripProperties | BusProperties | RecorderProperties | CommandActions | CommandButtons | CommandEqs,
+		property: StripProperties | BusProperties | RecorderProperties | CommandActions | CommandButtons | CommandEqs | VBAN | VBANInstream | VBANOutstream,
 		value: any
 	): Promise<any> => {
 		if (!this.isConnected) {
-			throw new Error("Not connected ");
+			throw new Error('Not connected');
 		}
 
 		let scriptString = '';
 
-		switch (selector) {
-			case "Strip":
-			case "Bus":
-				scriptString = `${selector}[${index}].${property}=${value};`;
-				break;
-			case "Command":
-				switch (property) {
-					case CommandButtons.State:
-						scriptString = `Command.Button[${index}].State=${value};`;
-					case CommandButtons.StateOnly:
-						scriptString = `Command.Button[${index}].StateOnly=${value};`;
-					case CommandButtons.Trigger:
-						scriptString = `Command.Button[${index}].Trigger=${value};`;
-					case CommandButtons.Color:
-						scriptString = `Command.Button[${index}].Color=${value};`;
-					case CommandEqs.SaveBus:
-						scriptString = `Command.SaveBUSEQ[${index}]=${value};`;
-					case CommandEqs.LoadBus:
-						scriptString = `Command.LoadBUSEQ[${index}]=${value};`;
-					case CommandEqs.SaveStrip:
-						scriptString = `Command.SaveStripEQ[${index}]=${value};`;
-					case CommandEqs.LoadStrip:
-						scriptString = `Command.LoadStripEQ[${index}]=${value};`;
-					default:
-						scriptString = `Command.${property}=${value};`;
-				}
-				break;
-			default:
-				scriptString = `${selector}.${property}=${value};`;
+		if (selector === 'Strip') {
+			scriptString = `${selector}[${index}].${property}=${value};`
+		} else if (selector === 'Bus') {
+			scriptString = `${selector}[${index}].${property}=${value};`
+		} else if (selector === 'Command') {
+			scriptString = `Command.${property}=${value};`;
+			if (property === CommandButtons.State) scriptString = `Command.Button[${index}].State=${value};`
+			if (property === CommandButtons.StateOnly) scriptString = `Command.Button[${index}].StateOnly=${value};`
+			if (property === CommandButtons.Trigger) scriptString = `Command.Button[${index}].Trigger=${value};`
+			if (property === CommandButtons.Color) scriptString = `Command.Button[${index}].Color=${value};`
+			if (property === CommandEqs.SaveBus) scriptString = `Command.SaveBUSEQ[${index}]=${value};`
+			if (property === CommandEqs.LoadBus) scriptString = `Command.LoadBUSEQ[${index}]=${value};`
+			if (property === CommandEqs.SaveStrip) scriptString = `Command.SaveStripEQ[${index}]=${value};`
+			if (property === CommandEqs.LoadStrip) scriptString = `Command.LoadStripEQ[${index}]=${value};`
+		} else if (selector === 'VBAN') {
+			scriptString = `vban.Enable=${value}`
+		} else if (selector === 'VBANInstream') {
+			scriptString = `vban.instream[${index}].${property}=${value}`
+		} else if (selector === 'VBANOutstream') {
+			scriptString = `vban.outstream[${index}].${property}=${value}`
+		} else {
+			scriptString = `${selector}.${property}=${value};`
 		}
 
 		return this.setOption(scriptString);
-	};
+	}
+
+	/**
+	 * Sets an option from a raw text string
+	 * @param  {string} value raw command
+	 */
+	public setRaw = (value: string) => {
+		return this.setOption(value)
+	}
 }

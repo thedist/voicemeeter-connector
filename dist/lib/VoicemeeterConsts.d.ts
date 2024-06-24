@@ -186,3 +186,28 @@ export declare enum CommandEqs {
     SaveStrip = "EqSaveStrip",
     LoadStrip = "EqLoadStrip"
 }
+export declare enum VBAN {
+    Enable = "Enable"
+}
+export declare enum VBANInstream {
+    On = "on",
+    Name = "name",
+    IP = "ip",
+    Port = "port",
+    SR = "sr",
+    Channel = "channel",
+    Bit = "bit",
+    Quality = "quality",
+    Route = "route"
+}
+export declare enum VBANOutstream {
+    On = "on",
+    Name = "name",
+    IP = "ip",
+    Port = "port",
+    SR = "sr",
+    Channel = "channel",
+    Bit = "bit",
+    Quality = "quality",
+    Route = "route"
+}

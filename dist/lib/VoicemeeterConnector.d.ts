@@ -1,5 +1,5 @@
-import { Device, VoiceMeeterTypes } from "../types/VoicemeeterTypes";
-import { BusProperties, RecorderProperties, StripProperties, CommandActions, CommandButtons, CommandEqs } from "./VoicemeeterConsts";
+import { Device, VoiceMeeterTypes } from '../types/VoicemeeterTypes';
+import { BusProperties, RecorderProperties, StripProperties, CommandActions, CommandButtons, CommandEqs, VBANInstream, VBANOutstream } from './VoicemeeterConsts';
 export default class Voicemeeter {
     /**
      * Initializes the voice meeter dll connection.
@@ -93,6 +93,41 @@ export default class Voicemeeter {
      */
     setStripParameter: (index: number, property: StripProperties, value: any) => Promise<any>;
     /**
+     * Gets VBAN On/Off parameter
+     */
+    getVBANParameter: () => any;
+    /**
+     * Set  VBAN On/Off parameter
+     * @param {any} value Property value
+     */
+    setVBANParameter: (value: any) => Promise<any>;
+    /**
+     * get VBAN Incoming Stream parameter
+     * @param  {nmber} index VBAN Stream incoming stream index
+     * @param  {VBANInstream} property Propertyname which should be changed
+     */
+    getVBANInstreamParameter: (index: number, property: VBANInstream) => any;
+    /**
+     * Set VBAN Incoming Stream parameter
+     * @param  {nmber} index VBAN Stream incoming stream index
+     * @param  {VBANInstream} property Propertyname which should be changed
+     * @param	 {any} value Property value
+     */
+    setVBANInstreamParameter: (index: number, property: VBANInstream, value: any) => Promise<any>;
+    /**
+     * get VBAN Outgoing Stream parameter
+     * @param  {nmber} index VBAN Stream incoming stream index
+     * @param  {VBANInstream} property Propertyname which should be changed
+     */
+    getVBANOutstreamParameter: (index: number, property: VBANOutstream) => any;
+    /**
+     * Set VBAN Outgoing Stream parameter
+     * @param  {nmber} index VBAN Stream incoming stream index
+     * @param  {VBANInstream} property Propertyname which should be changed
+     * @param	 {any} value Property value
+     */
+    setVBANOutstreamParameter: (index: number, property: VBANOutstream, value: any) => Promise<any>;
+    /**
      * Execute a Command Action
      * @param  {CommandActions} property Action which should be called
      * @param  {any} value Property value
@@ -158,4 +193,9 @@ export default class Voicemeeter {
      * @param  {any} value Property value
      */
     private setParameter;
+    /**
+     * Sets an option from a raw text string
+     * @param  {string} value raw command
+     */
+    setRaw: (value: string) => Promise<unknown>;
 }
